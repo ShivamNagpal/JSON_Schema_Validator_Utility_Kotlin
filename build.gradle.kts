@@ -12,6 +12,9 @@ repositories {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/com.networknt/json-schema-validator
+    implementation("com.networknt:json-schema-validator:1.0.72")
+
     implementation("org.junit.jupiter:junit-jupiter:5.8.2")
     testImplementation(kotlin("test"))
 }
