@@ -6,10 +6,10 @@ abstract class SchemaLoader {
 
     abstract fun fetchSchemaById(id: String): Optional<String>
     fun loads(id: String): String {
-        val schemaOptional = fetchSchemaById(id)
-        if (schemaOptional.isEmpty) {
-            TODO("Throw Validation Exception")
+        val schemaOptional: Optional<String> = fetchSchemaById(id)
+        if (schemaOptional.isPresent) {
+            return schemaOptional.get()
         }
-        return schemaOptional.get()
+        TODO("Throw Validation Exception")
     }
 }

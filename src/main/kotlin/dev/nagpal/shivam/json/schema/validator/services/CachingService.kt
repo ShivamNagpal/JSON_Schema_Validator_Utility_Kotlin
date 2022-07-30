@@ -6,7 +6,7 @@ import dev.nagpal.shivam.json.schema.validator.loaders.SchemaLoader
 import dev.nagpal.shivam.json.schema.validator.vendor.SchemaIngestionService
 import dev.nagpal.shivam.json.schema.validator.vendor.SchemaValidator
 
-class CachingHelper(
+internal class CachingService internal constructor(
     private val schemaLoader: SchemaLoader,
     private val schemaIngestionService: SchemaIngestionService,
 ) {

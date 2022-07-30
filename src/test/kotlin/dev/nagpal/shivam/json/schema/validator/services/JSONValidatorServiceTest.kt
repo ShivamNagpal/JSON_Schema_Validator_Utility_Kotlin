@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class JSONValidatorServiceTest {
 
@@ -18,8 +19,8 @@ internal class JSONValidatorServiceTest {
 
     @Test
     fun testBuilderCreation() {
-        val jsonValidatorService = JsonValidatorService.builder(object : SchemaLoader {
-            override fun loads(id: String): String {
+        val jsonValidatorService = JsonValidatorService.builder(object : SchemaLoader() {
+            override fun fetchSchemaById(id: String): Optional<String> {
                 TODO("Not yet implemented")
             }
         }).build()
