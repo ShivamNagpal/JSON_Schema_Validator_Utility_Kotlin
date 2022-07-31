@@ -1,51 +1,85 @@
 package dev.nagpal.shivam.json.schema.validator.services
 
 import dev.nagpal.shivam.json.schema.validator.cache.CacheProperties
+import dev.nagpal.shivam.json.schema.validator.cache.CacheStore
+import dev.nagpal.shivam.json.schema.validator.cache.LocalCacheStore
 import dev.nagpal.shivam.json.schema.validator.enums.ResponseMessage
 import dev.nagpal.shivam.json.schema.validator.exceptions.ValidationException
 import dev.nagpal.shivam.json.schema.validator.loaders.SchemaLoader
 import dev.nagpal.shivam.json.schema.validator.models.ValidationConstraintViolation
 import dev.nagpal.shivam.json.schema.validator.vendor.SchemaIngestionService
+import dev.nagpal.shivam.json.schema.validator.vendor.SchemaValidator
 import dev.nagpal.shivam.json.schema.validator.vendor.impl.networknt.NetworkNTSchemaIngestionService
 
 class JsonValidatorService private constructor(
     val schemaLoader: SchemaLoader,
+    val cacheProperties: CacheProperties,
+    val schemaIngestionService: SchemaIngestionService,
 ) {
-    var cacheProperties: CacheProperties = CacheProperties.builder().build()
-        private set
-    var schemaIngestionService: SchemaIngestionService = NetworkNTSchemaIngestionService()
-        private set
-    lateinit var cachingService: CachingService
-        private set
+    private val cacheStores: List<CacheStore> = cacheProperties.getCacheStores()
+    private val enableLocalCache: Boolean = cacheProperties.enableLocalCache
+    private lateinit var localCacheStore: LocalCacheStore
 
-    private fun initializeCachingService() {
-        this.cachingService = CachingService(schemaLoader, cacheProperties, schemaIngestionService)
+    init {
+        if (cacheProperties.enableLocalCache) {
+            this.localCacheStore = LocalCacheStore()
+        }
     }
 
     fun validate(id: String, content: String) {
-        val schemaValidator = cachingService.fetchSchema(id)
+        val schemaValidator = fetchSchema(id)
         val constraintViolations: Set<ValidationConstraintViolation> = schemaValidator.validate(content)
         if (constraintViolations.isNotEmpty()) {
             throw ValidationException(ResponseMessage.CONTENT_CONSTRAINT_VIOLATION, constraintViolations)
         }
     }
 
-    class JsonValidatorServiceBuilder internal constructor(schemaLoader: SchemaLoader) {
-        private val jsonValidatorService: JsonValidatorService = JsonValidatorService(schemaLoader)
+    private fun fetchSchema(id: String): SchemaValidator {
+        if (this.enableLocalCache) {
+            val schemaValidator: SchemaValidator? = this.localCacheStore.get(id)
+            if (schemaValidator != null) {
+                return schemaValidator
+            }
+        }
+        val cacheStoresToBeRefreshed = mutableListOf<CacheStore>()
+        var schemaString: String? = null
+        for (cacheStore in this.cacheStores) {
+            schemaString = cacheStore.get(id)
+            if (schemaString == null) {
+                cacheStoresToBeRefreshed.add(0, cacheStore)
+            } else {
+                break
+            }
+        }
+        if (schemaString == null) {
+            schemaString = this.schemaLoader.loads(id)
+        }
+        val schemaValidator = this.schemaIngestionService.ingestSchema(schemaString)
+        for (cacheStore in cacheStoresToBeRefreshed) {
+            cacheStore.put(id, schemaString)
+        }
+        if (this.enableLocalCache) {
+            this.localCacheStore.put(id, schemaValidator)
+        }
+        return schemaValidator
+    }
+
+    class JsonValidatorServiceBuilder internal constructor(private val schemaLoader: SchemaLoader) {
+        private var cacheProperties: CacheProperties = CacheProperties.builder().build()
+        private var schemaIngestionService: SchemaIngestionService = NetworkNTSchemaIngestionService()
 
         fun cacheProperties(cacheProperties: CacheProperties): JsonValidatorServiceBuilder {
-            this.jsonValidatorService.cacheProperties = cacheProperties
+            this.cacheProperties = cacheProperties
             return this
         }
 
         fun schemaIngestionService(schemaIngestionService: SchemaIngestionService): JsonValidatorServiceBuilder {
-            this.jsonValidatorService.schemaIngestionService = schemaIngestionService
+            this.schemaIngestionService = schemaIngestionService
             return this
         }
 
         fun build(): JsonValidatorService {
-            this.jsonValidatorService.initializeCachingService()
-            return jsonValidatorService
+            return JsonValidatorService(schemaLoader, cacheProperties, schemaIngestionService)
         }
     }
 

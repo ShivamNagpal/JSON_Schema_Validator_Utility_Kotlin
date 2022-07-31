@@ -38,12 +38,4 @@ internal class JSONValidatorServiceTest {
         Assertions.assertNotNull(jsonValidatorService)
         Assertions.assertNotNull(jsonValidatorService.schemaIngestionService)
     }
-
-    @Test
-    fun testBuilderCacheServiceInitialization() {
-        val jsonValidatorService = JsonValidatorService.builder(StringSchemaLoader("{}"))
-            .build()
-        Assertions.assertNotNull(jsonValidatorService)
-        Assertions.assertNotNull(jsonValidatorService.cachingService)
-    }
 }
