@@ -3,19 +3,35 @@ import dev.nagpal.shivam.json.schema.validator.cache.CacheStore;
 import dev.nagpal.shivam.json.schema.validator.loaders.impl.StringSchemaLoader;
 import dev.nagpal.shivam.json.schema.validator.services.JsonValidatorService;
 import dev.nagpal.shivam.json.schema.validator.vendor.impl.networknt.NetworkNTSchemaIngestionService;
+import kotlin.UninitializedPropertyAccessException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
 
 class JavaAccessibilityTest {
 
     @Test
-    void createJavaValidatorServiceUsingBuilder() {
+    void createJsonValidatorServiceUsingBuilder() {
         JsonValidatorService.JsonValidatorServiceBuilder builder = JsonValidatorService
-                .builder(new StringSchemaLoader("{}"))
+                .builder(new StringSchemaLoader(new HashMap<>()))
                 .cacheProperties(CacheProperties.builder().build())
                 .schemaIngestionService(new NetworkNTSchemaIngestionService());
-        builder.build();
+        JsonValidatorService jsonValidatorService = builder.build();
+        Assertions.assertNotNull(jsonValidatorService);
+    }
+
+    @Test
+    void testJsonValidatorServiceDisableLocalCache() {
+        JsonValidatorService.JsonValidatorServiceBuilder builder = JsonValidatorService
+                .builder(new StringSchemaLoader(new HashMap<>()))
+                .cacheProperties(CacheProperties.builder().enableLocalCache(false).build())
+                .schemaIngestionService(new NetworkNTSchemaIngestionService());
+        JsonValidatorService jsonValidatorService = builder.build();
+        Assertions.assertNotNull(jsonValidatorService);
+        Assertions.assertThrowsExactly(UninitializedPropertyAccessException.class, jsonValidatorService::getLocalCacheStore);
     }
 
     @Test
@@ -23,7 +39,8 @@ class JavaAccessibilityTest {
         CacheProperties.CachePropertiesBuilder builder = CacheProperties.builder()
                 .enableLocalCache(false)
                 .addCacheStore(getDummyCacheStore());
-        builder.build();
+        CacheProperties cacheProperties = builder.build();
+        Assertions.assertNotNull(cacheProperties);
     }
 
     @NotNull

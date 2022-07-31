@@ -15,9 +15,9 @@ internal class CachePropertiesTest {
         val cacheProperties = cachePropertiesBuilder.build()
         Assertions.assertNotNull(cacheProperties)
         Assertions.assertEquals(false, cacheProperties.enableLocalCache)
-        Assertions.assertEquals(2, cacheProperties.getCacheStores().size)
-        Assertions.assertEquals(cacheStore1, cacheProperties.getCacheStores()[0])
-        Assertions.assertEquals(cacheStore2, cacheProperties.getCacheStores()[1])
+        Assertions.assertEquals(2, cacheProperties.cacheStores.size)
+        Assertions.assertEquals(cacheStore1, cacheProperties.cacheStores[0])
+        Assertions.assertEquals(cacheStore2, cacheProperties.cacheStores[1])
     }
 
     @Test
@@ -31,7 +31,7 @@ internal class CachePropertiesTest {
     fun testBuilderDefaultCacheStore() {
         val cacheProperties = CacheProperties.builder().build()
         Assertions.assertNotNull(cacheProperties)
-        Assertions.assertEquals(0, cacheProperties.getCacheStores().size)
+        Assertions.assertEquals(0, cacheProperties.cacheStores.size)
     }
 
     private fun getDummyCacheStore() = object : CacheStore {

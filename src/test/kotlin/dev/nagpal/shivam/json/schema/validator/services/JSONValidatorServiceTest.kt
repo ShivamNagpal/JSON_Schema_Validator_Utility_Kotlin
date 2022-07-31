@@ -10,7 +10,7 @@ internal class JSONValidatorServiceTest {
 
     @Test
     fun testBuilderCreation() {
-        val schemaLoader = StringSchemaLoader("{}")
+        val schemaLoader = StringSchemaLoader(mapOf())
         val cacheProperties = CacheProperties.builder().build()
         val schemaIngestionService = NetworkNTSchemaIngestionService()
         val jsonValidatorServiceBuilder = JsonValidatorService.builder(schemaLoader)
@@ -21,11 +21,12 @@ internal class JSONValidatorServiceTest {
         Assertions.assertEquals(schemaLoader, jsonValidatorService.schemaLoader)
         Assertions.assertEquals(cacheProperties, jsonValidatorService.cacheProperties)
         Assertions.assertEquals(schemaIngestionService, jsonValidatorService.schemaIngestionService)
+        Assertions.assertNotNull(jsonValidatorService.localCacheStore)
     }
 
     @Test
     fun testBuilderDefaultCacheProperties() {
-        val jsonValidatorService = JsonValidatorService.builder(StringSchemaLoader("{}"))
+        val jsonValidatorService = JsonValidatorService.builder(StringSchemaLoader(mapOf()))
             .build()
         Assertions.assertNotNull(jsonValidatorService)
         Assertions.assertNotNull(jsonValidatorService.cacheProperties)
@@ -33,9 +34,20 @@ internal class JSONValidatorServiceTest {
 
     @Test
     fun testBuilderDefaultSchemaIngestionService() {
-        val jsonValidatorService = JsonValidatorService.builder(StringSchemaLoader("{}"))
+        val jsonValidatorService = JsonValidatorService.builder(StringSchemaLoader(mapOf()))
             .build()
         Assertions.assertNotNull(jsonValidatorService)
         Assertions.assertNotNull(jsonValidatorService.schemaIngestionService)
+    }
+
+    @Test
+    fun testLocalCacheNonInitializationOnDisable() {
+        val jsonValidatorService = JsonValidatorService.builder(StringSchemaLoader(mapOf()))
+            .cacheProperties(CacheProperties.builder().enableLocalCache(false).build())
+            .build()
+        Assertions.assertNotNull(jsonValidatorService)
+        Assertions.assertThrowsExactly(UninitializedPropertyAccessException::class.java) {
+            jsonValidatorService.localCacheStore
+        }
     }
 }

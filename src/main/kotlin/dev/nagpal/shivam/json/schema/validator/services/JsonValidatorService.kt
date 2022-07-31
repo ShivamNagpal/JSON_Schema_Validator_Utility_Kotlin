@@ -16,9 +16,10 @@ class JsonValidatorService private constructor(
     val cacheProperties: CacheProperties,
     val schemaIngestionService: SchemaIngestionService,
 ) {
-    private val cacheStores: List<CacheStore> = cacheProperties.getCacheStores()
+    private val cacheStores: List<CacheStore> = cacheProperties.cacheStores
     private val enableLocalCache: Boolean = cacheProperties.enableLocalCache
-    private lateinit var localCacheStore: LocalCacheStore
+    lateinit var localCacheStore: LocalCacheStore
+        internal set
 
     init {
         if (cacheProperties.enableLocalCache) {

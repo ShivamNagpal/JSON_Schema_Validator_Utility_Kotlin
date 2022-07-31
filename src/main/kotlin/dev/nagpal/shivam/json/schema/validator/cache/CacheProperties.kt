@@ -1,29 +1,25 @@
 package dev.nagpal.shivam.json.schema.validator.cache
 
-class CacheProperties private constructor() {
-    var enableLocalCache: Boolean = true
-        private set
-    private val cacheStores = mutableListOf<CacheStore>()
-
-    fun getCacheStores(): List<CacheStore> {
-        return cacheStores
-    }
-
+class CacheProperties private constructor(
+    val enableLocalCache: Boolean,
+    val cacheStores: List<CacheStore>
+) {
     class CachePropertiesBuilder internal constructor() {
-        private val cacheProperties: CacheProperties = CacheProperties()
+        private var enableLocalCache: Boolean = true
+        private val cacheStores = mutableListOf<CacheStore>()
 
         fun enableLocalCache(enable: Boolean): CachePropertiesBuilder {
-            cacheProperties.enableLocalCache = enable
+            this.enableLocalCache = enable
             return this
         }
 
         fun addCacheStore(cacheStore: CacheStore): CachePropertiesBuilder {
-            cacheProperties.cacheStores.add(cacheStore)
+            this.cacheStores.add(cacheStore)
             return this
         }
 
         fun build(): CacheProperties {
-            return cacheProperties
+            return CacheProperties(this.enableLocalCache, this.cacheStores)
         }
     }
 
