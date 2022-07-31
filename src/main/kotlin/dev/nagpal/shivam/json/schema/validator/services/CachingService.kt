@@ -1,5 +1,6 @@
 package dev.nagpal.shivam.json.schema.validator.services
 
+import dev.nagpal.shivam.json.schema.validator.cache.CacheProperties
 import dev.nagpal.shivam.json.schema.validator.cache.CacheStore
 import dev.nagpal.shivam.json.schema.validator.cache.LocalCacheStore
 import dev.nagpal.shivam.json.schema.validator.loaders.SchemaLoader
@@ -8,23 +9,32 @@ import dev.nagpal.shivam.json.schema.validator.vendor.SchemaValidator
 
 internal class CachingService internal constructor(
     private val schemaLoader: SchemaLoader,
+    cacheProperties: CacheProperties,
     private val schemaIngestionService: SchemaIngestionService,
 ) {
-    private val localCacheStore = LocalCacheStore()
-    private val cacheStores = mutableListOf<CacheStore>()
-    var enableLocalCache = true
+    private val cacheStores: MutableList<CacheStore>
+    private val enableLocalCache: Boolean
+    private lateinit var localCacheStore: LocalCacheStore
+
+    init {
+        this.enableLocalCache = cacheProperties.enableLocalCache
+        this.cacheStores = cacheProperties.cacheStores
+        if (cacheProperties.enableLocalCache) {
+            this.localCacheStore = LocalCacheStore()
+        }
+    }
 
 
     fun fetchSchema(id: String): SchemaValidator {
-        if (enableLocalCache) {
-            val schemaValidator: SchemaValidator? = localCacheStore.get(id)
+        if (this.enableLocalCache) {
+            val schemaValidator: SchemaValidator? = this.localCacheStore.get(id)
             if (schemaValidator != null) {
                 return schemaValidator
             }
         }
         val cacheStoresToBeRefreshed = mutableListOf<CacheStore>()
         var schemaString: String? = null
-        for (cacheStore in cacheStores) {
+        for (cacheStore in this.cacheStores) {
             schemaString = cacheStore.get(id)
             if (schemaString == null) {
                 cacheStoresToBeRefreshed.add(0, cacheStore)
@@ -33,21 +43,16 @@ internal class CachingService internal constructor(
             }
         }
         if (schemaString == null) {
-            schemaString = schemaLoader.loads(id)
+            schemaString = this.schemaLoader.loads(id)
         }
-        val schemaValidator = schemaIngestionService.ingestSchema(schemaString)
+        val schemaValidator = this.schemaIngestionService.ingestSchema(schemaString)
         for (cacheStore in cacheStoresToBeRefreshed) {
             cacheStore.put(id, schemaString)
         }
-        if (enableLocalCache) {
-            localCacheStore.put(id, schemaValidator)
+        if (this.enableLocalCache) {
+            this.localCacheStore.put(id, schemaValidator)
         }
         return schemaValidator
 
     }
-
-    fun addCacheStore(cacheStore: CacheStore) {
-        cacheStores.add(cacheStore)
-    }
-
 }

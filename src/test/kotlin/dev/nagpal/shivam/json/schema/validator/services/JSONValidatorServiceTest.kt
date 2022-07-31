@@ -19,11 +19,13 @@ internal class JSONValidatorServiceTest {
 
     @Test
     fun testBuilderCreation() {
-        val jsonValidatorService = JsonValidatorService.builder(object : SchemaLoader() {
+        val schemaLoader = object : SchemaLoader() {
             override fun fetchSchemaById(id: String): Optional<String> {
                 TODO("Not yet implemented")
             }
-        }).build()
+        }
+        val jsonValidatorService = JsonValidatorService.builder(schemaLoader).build()
+        Assertions.assertEquals(schemaLoader, jsonValidatorService.schemaLoader)
         Assertions.assertNotNull(jsonValidatorService)
     }
 }
