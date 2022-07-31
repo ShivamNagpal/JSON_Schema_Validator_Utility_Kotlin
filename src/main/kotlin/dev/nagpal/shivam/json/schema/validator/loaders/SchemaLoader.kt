@@ -8,9 +8,15 @@ abstract class SchemaLoader {
 
     abstract fun fetchSchemaById(id: String): Optional<String>
     fun loads(id: String): String {
-        val schemaOptional: Optional<String> = fetchSchemaById(id)
-        if (schemaOptional.isPresent) {
-            return schemaOptional.get()
+        try {
+            val schemaOptional: Optional<String> = fetchSchemaById(id)
+            if (schemaOptional.isPresent) {
+                return schemaOptional.get()
+            }
+        } catch (e: ValidationException) {
+            throw e
+        } catch (_: Exception) {
+            // Common Exception is thrown below
         }
         throw ValidationException(ResponseDetails.COULD_NOT_LOAD_SCHEMA, id)
     }
