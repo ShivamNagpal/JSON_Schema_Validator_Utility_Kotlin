@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "required": [
+    "name",
+    "address"
+  ],
+  "properties": {
+    "name": {
+      "$ref": "#/$defs/non_blank_string"
+    },
+    "address": {
+      "$ref": "#/$defs/non_blank_string"
+    }
+  },
+  "$defs": {
+    "non_blank_string": {
+      "type": "string",
+      "pattern": "\\S"
+    }
+  }
+}

@@ -1,12 +1,21 @@
 package dev.nagpal.shivam.json.schema.validator.exceptions
 
-import dev.nagpal.shivam.json.schema.validator.enums.ResponseMessage
+import dev.nagpal.shivam.json.schema.validator.enums.ResponseDetails
 import dev.nagpal.shivam.json.schema.validator.models.ValidationConstraintViolation
 
-class ValidationException(
-    responseMessage: ResponseMessage,
-    val validationConstraintViolations: Set<ValidationConstraintViolation>
-) : RuntimeException(responseMessage.message) {
-    val messageCode: String = responseMessage.messageCode
+class ValidationException constructor(
+    responseDetails: ResponseDetails,
+    val validationConstraintViolations: List<ValidationConstraintViolation>?,
+    vararg variables: String,
+) : RuntimeException(responseDetails.getMessage(*variables)) {
+    val messageCode: String = responseDetails.messageCode
 
+    init {
+        println()
+    }
+
+    constructor(
+        responseDetails: ResponseDetails,
+        vararg variables: String,
+    ) : this(responseDetails, null, *variables)
 }

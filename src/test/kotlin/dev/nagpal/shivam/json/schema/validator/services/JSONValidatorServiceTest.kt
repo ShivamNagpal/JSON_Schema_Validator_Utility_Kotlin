@@ -1,12 +1,27 @@
 package dev.nagpal.shivam.json.schema.validator.services
 
 import dev.nagpal.shivam.json.schema.validator.cache.CacheProperties
+import dev.nagpal.shivam.json.schema.validator.cache.LocalCacheStore
+import dev.nagpal.shivam.json.schema.validator.enums.ResponseDetails
+import dev.nagpal.shivam.json.schema.validator.exceptions.ValidationException
+import dev.nagpal.shivam.json.schema.validator.loaders.impl.ResourceSchemaLoader
 import dev.nagpal.shivam.json.schema.validator.loaders.impl.StringSchemaLoader
 import dev.nagpal.shivam.json.schema.validator.vendor.impl.networknt.NetworkNTSchemaIngestionService
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito
+import org.mockito.junit.jupiter.MockitoExtension
 
+@ExtendWith(MockitoExtension::class)
 internal class JSONValidatorServiceTest {
+    private var localCacheStore: LocalCacheStore? = null
+
+    @BeforeEach
+    fun beforeEach() {
+        localCacheStore = Mockito.mock(LocalCacheStore::class.java)
+    }
 
     @Test
     fun testBuilderCreation() {
@@ -49,5 +64,46 @@ internal class JSONValidatorServiceTest {
         Assertions.assertThrowsExactly(UninitializedPropertyAccessException::class.java) {
             jsonValidatorService.localCacheStore
         }
+    }
+
+    @Test
+    fun testValidateSchemaWithoutCacheValidContent() {
+        val schemaLoader = ResourceSchemaLoader(pathPrefix = "schema", fileNameSuffix = ".json")
+        val jsonValidatorService = JsonValidatorService
+            .builder(schemaLoader)
+            .cacheProperties(CacheProperties.builder().enableLocalCache(false).build())
+            .build()
+        val content = """{"name":"temp","address":"temp"}"""
+        jsonValidatorService.validate("test-schema", content)
+    }
+
+    @Test
+    fun testValidateSchemaWithoutCacheInvalidContent() {
+        val schemaLoader = ResourceSchemaLoader(pathPrefix = "schema", fileNameSuffix = ".json")
+        val jsonValidatorService = JsonValidatorService
+            .builder(schemaLoader)
+            .cacheProperties(CacheProperties.builder().enableLocalCache(false).build())
+            .build()
+        val content = """{"address":""}"""
+        val validationException = Assertions.assertThrowsExactly(ValidationException::class.java) {
+            jsonValidatorService.validate("test-schema", content)
+        }
+        val responseDetails = ResponseDetails.CONTENT_CONSTRAINT_VIOLATION
+        Assertions.assertEquals(responseDetails.messageCode, validationException.messageCode)
+        Assertions.assertEquals(responseDetails.getMessage(), validationException.message)
+        Assertions.assertEquals(2, validationException.validationConstraintViolations?.size)
+    }
+
+    @Test
+    fun testValidateLocalCacheNotCalledWhenDisabled() {
+        val schemaLoader = ResourceSchemaLoader(pathPrefix = "schema", fileNameSuffix = ".json")
+        val jsonValidatorService = JsonValidatorService
+            .builder(schemaLoader)
+            .cacheProperties(CacheProperties.builder().enableLocalCache(false).build())
+            .build()
+        jsonValidatorService.localCacheStore = localCacheStore!!
+        val content = """{"name":"temp","address":"temp"}"""
+        jsonValidatorService.validate("test-schema", content)
+        Mockito.verify(localCacheStore, Mockito.times(0))!!.get(Mockito.anyString())
     }
 }

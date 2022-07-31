@@ -1,5 +1,7 @@
 package dev.nagpal.shivam.json.schema.validator.loaders
 
+import dev.nagpal.shivam.json.schema.validator.enums.ResponseDetails
+import dev.nagpal.shivam.json.schema.validator.exceptions.ValidationException
 import java.util.*
 
 abstract class SchemaLoader {
@@ -10,6 +12,6 @@ abstract class SchemaLoader {
         if (schemaOptional.isPresent) {
             return schemaOptional.get()
         }
-        TODO("Throw Validation Exception")
+        throw ValidationException(ResponseDetails.COULD_NOT_LOAD_SCHEMA, id)
     }
 }

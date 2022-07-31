@@ -14,10 +14,16 @@ class NetworkNTSchemaValidator(private val jsonSchema: JsonSchema) : SchemaValid
         jsonSchema.initializeValidators()
     }
 
-    override fun validate(content: String): Set<ValidationConstraintViolation> {
+    override fun validate(content: String): List<ValidationConstraintViolation> {
         val readTree: JsonNode = objectMapper.readTree(content)
         val validationMessages: MutableSet<ValidationMessage> = jsonSchema.validate(readTree)
-        return validationMessages.map { ValidationConstraintViolation() }
-            .toSet() // TODO: Transform ValidationConstraintViolation
+        return validationMessages.map {
+            ValidationConstraintViolation(
+                message = it.message,
+                type = it.type,
+                path = it.path,
+                schemaPath = it.schemaPath,
+            )
+        }
     }
 }

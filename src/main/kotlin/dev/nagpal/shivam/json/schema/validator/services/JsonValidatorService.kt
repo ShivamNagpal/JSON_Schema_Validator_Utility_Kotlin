@@ -3,7 +3,7 @@ package dev.nagpal.shivam.json.schema.validator.services
 import dev.nagpal.shivam.json.schema.validator.cache.CacheProperties
 import dev.nagpal.shivam.json.schema.validator.cache.CacheStore
 import dev.nagpal.shivam.json.schema.validator.cache.LocalCacheStore
-import dev.nagpal.shivam.json.schema.validator.enums.ResponseMessage
+import dev.nagpal.shivam.json.schema.validator.enums.ResponseDetails
 import dev.nagpal.shivam.json.schema.validator.exceptions.ValidationException
 import dev.nagpal.shivam.json.schema.validator.loaders.SchemaLoader
 import dev.nagpal.shivam.json.schema.validator.models.ValidationConstraintViolation
@@ -18,8 +18,7 @@ class JsonValidatorService private constructor(
 ) {
     private val cacheStores: List<CacheStore> = cacheProperties.cacheStores
     private val enableLocalCache: Boolean = cacheProperties.enableLocalCache
-    lateinit var localCacheStore: LocalCacheStore
-        internal set
+    internal lateinit var localCacheStore: LocalCacheStore
 
     init {
         if (cacheProperties.enableLocalCache) {
@@ -29,9 +28,9 @@ class JsonValidatorService private constructor(
 
     fun validate(id: String, content: String) {
         val schemaValidator = fetchSchema(id)
-        val constraintViolations: Set<ValidationConstraintViolation> = schemaValidator.validate(content)
+        val constraintViolations: List<ValidationConstraintViolation> = schemaValidator.validate(content)
         if (constraintViolations.isNotEmpty()) {
-            throw ValidationException(ResponseMessage.CONTENT_CONSTRAINT_VIOLATION, constraintViolations)
+            throw ValidationException(ResponseDetails.CONTENT_CONSTRAINT_VIOLATION, constraintViolations)
         }
     }
 
@@ -83,7 +82,6 @@ class JsonValidatorService private constructor(
             return JsonValidatorService(schemaLoader, cacheProperties, schemaIngestionService)
         }
     }
-
 
     companion object {
         @JvmStatic

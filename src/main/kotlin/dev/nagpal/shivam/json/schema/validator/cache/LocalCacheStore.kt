@@ -2,7 +2,7 @@ package dev.nagpal.shivam.json.schema.validator.cache
 
 import dev.nagpal.shivam.json.schema.validator.vendor.SchemaValidator
 
-class LocalCacheStore : CacheStoreGeneric<String, SchemaValidator> {
+open class LocalCacheStore : CacheStoreGeneric<String, SchemaValidator> {
     private val map: Map<String, SchemaValidator> = mutableMapOf() // TODO: Replace with App Cache Vendor
 
     override fun get(key: String): SchemaValidator? {
