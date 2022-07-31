@@ -6,6 +6,7 @@ import dev.nagpal.shivam.json.schema.validator.enums.ResponseDetails
 import dev.nagpal.shivam.json.schema.validator.exceptions.ValidationException
 import dev.nagpal.shivam.json.schema.validator.loaders.impl.ResourceSchemaLoader
 import dev.nagpal.shivam.json.schema.validator.loaders.impl.StringSchemaLoader
+import dev.nagpal.shivam.json.schema.validator.test.helper.TestDataHelper
 import dev.nagpal.shivam.json.schema.validator.vendor.impl.networknt.NetworkNTSchemaIngestionService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -16,11 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
 internal class JSONValidatorServiceTest {
-    private var localCacheStore: LocalCacheStore? = null
+    private lateinit var localCacheStore: LocalCacheStore
+    private lateinit var stringSchemaLoader: StringSchemaLoader
 
     @BeforeEach
     fun beforeEach() {
         localCacheStore = Mockito.mock(LocalCacheStore::class.java)
+        stringSchemaLoader = Mockito.mock(StringSchemaLoader::class.java)
     }
 
     @Test
@@ -101,9 +104,27 @@ internal class JSONValidatorServiceTest {
             .builder(schemaLoader)
             .cacheProperties(CacheProperties.builder().enableLocalCache(false).build())
             .build()
-        jsonValidatorService.localCacheStore = localCacheStore!!
+        jsonValidatorService.localCacheStore = localCacheStore
         val content = """{"name":"temp","address":"temp"}"""
         jsonValidatorService.validate("test-schema", content)
-        Mockito.verify(localCacheStore, Mockito.times(0))!!.get(Mockito.anyString())
+        Mockito.verify(localCacheStore, Mockito.times(0)).get(Mockito.anyString())
+    }
+
+    @Test
+    fun testValidateValueUsedFromLocalCacheIfPresent() {
+        val jsonValidatorService = JsonValidatorService
+            .builder(stringSchemaLoader)
+            .cacheProperties(CacheProperties.builder().build())
+            .build()
+
+        val schemaValidator = TestDataHelper.getSchemaValidator()
+        val key = "id1"
+        Mockito.`when`(localCacheStore.get(key)).thenReturn(schemaValidator)
+        jsonValidatorService.localCacheStore = localCacheStore
+        val content = """{"name":"temp","address":"temp"}"""
+        jsonValidatorService.validate(key, content)
+
+        Mockito.verify(localCacheStore, Mockito.times(1)).get(Mockito.anyString())
+//        Mockito.verify(stringSchemaLoader, Mockito.times(0)).loads(Mockito.anyString())
     }
 }

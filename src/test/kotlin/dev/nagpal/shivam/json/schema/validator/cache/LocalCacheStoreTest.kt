@@ -1,8 +1,7 @@
 package dev.nagpal.shivam.json.schema.validator.cache
 
-import dev.nagpal.shivam.json.schema.validator.loaders.impl.ResourceSchemaLoader
+import dev.nagpal.shivam.json.schema.validator.test.helper.TestDataHelper
 import dev.nagpal.shivam.json.schema.validator.vendor.SchemaValidator
-import dev.nagpal.shivam.json.schema.validator.vendor.impl.networknt.NetworkNTSchemaIngestionService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Duration
@@ -13,7 +12,7 @@ internal class LocalCacheStoreTest {
     fun testCachePersistence() {
         val cacheProperties = CacheProperties.builder().build()
         val localCacheStore = LocalCacheStore(cacheProperties)
-        val schemaValidator: SchemaValidator = getSchemaValidator()
+        val schemaValidator: SchemaValidator = TestDataHelper.getSchemaValidator()
         val key = "id1"
         localCacheStore.put(key, schemaValidator)
         val cachedSchemaValidator: SchemaValidator? = localCacheStore.get(key)
@@ -34,7 +33,7 @@ internal class LocalCacheStoreTest {
         val cacheProperties = CacheProperties.builder().build()
         val localCacheStore = LocalCacheStore(cacheProperties)
         val key = "id1"
-        localCacheStore.put(key, getSchemaValidator())
+        localCacheStore.put(key, TestDataHelper.getSchemaValidator())
         localCacheStore.delete(key)
         val cachedSchemaValidator: SchemaValidator? = localCacheStore.get(key)
         Assertions.assertNull(cachedSchemaValidator)
@@ -46,8 +45,8 @@ internal class LocalCacheStoreTest {
         val localCacheStore = LocalCacheStore(cacheProperties)
         val key1 = "id1"
         val key2 = "id2"
-        localCacheStore.put(key1, getSchemaValidator())
-        localCacheStore.put(key2, getSchemaValidator())
+        localCacheStore.put(key1, TestDataHelper.getSchemaValidator())
+        localCacheStore.put(key2, TestDataHelper.getSchemaValidator())
         localCacheStore.deleteAll()
         val cachedSchemaValidator1: SchemaValidator? = localCacheStore.get(key1)
         val cachedSchemaValidator2: SchemaValidator? = localCacheStore.get(key2)
@@ -63,12 +62,5 @@ internal class LocalCacheStoreTest {
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
             .build()
         val localCacheStore = LocalCacheStore(cacheProperties)
-    }
-
-    private fun getSchemaValidator(): SchemaValidator {
-        val resourceSchemaLoader = ResourceSchemaLoader(pathPrefix = "schema", ".json")
-        val schema: String = resourceSchemaLoader.loads("test-schema")
-        val networkNTSchemaIngestionService = NetworkNTSchemaIngestionService()
-        return networkNTSchemaIngestionService.ingestSchema(schema)
     }
 }

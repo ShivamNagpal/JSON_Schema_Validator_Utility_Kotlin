@@ -8,7 +8,7 @@ import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-class ResourceSchemaLoader(
+open class ResourceSchemaLoader(
     pathPrefix: String = "",
     private val fileNameSuffix: String = ""
 ) : SchemaLoader() {
