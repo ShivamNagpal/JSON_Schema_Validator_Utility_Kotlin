@@ -15,7 +15,8 @@ class JsonValidatorService private constructor(
         private set
     var schemaIngestionService: SchemaIngestionService = NetworkNTSchemaIngestionService()
         private set
-    private lateinit var cachingService: CachingService
+    lateinit var cachingService: CachingService
+        private set
 
     private fun initializeCachingService() {
         this.cachingService = CachingService(schemaLoader, cacheProperties, schemaIngestionService)
@@ -32,7 +33,7 @@ class JsonValidatorService private constructor(
     class JsonValidatorServiceBuilder internal constructor(schemaLoader: SchemaLoader) {
         private val jsonValidatorService: JsonValidatorService = JsonValidatorService(schemaLoader)
 
-        fun cachingProperties(cacheProperties: CacheProperties): JsonValidatorServiceBuilder {
+        fun cacheProperties(cacheProperties: CacheProperties): JsonValidatorServiceBuilder {
             this.jsonValidatorService.cacheProperties = cacheProperties
             return this
         }

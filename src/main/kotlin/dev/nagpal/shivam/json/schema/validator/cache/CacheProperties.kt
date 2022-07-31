@@ -3,12 +3,16 @@ package dev.nagpal.shivam.json.schema.validator.cache
 class CacheProperties private constructor() {
     var enableLocalCache: Boolean = true
         private set
-    val cacheStores = mutableListOf<CacheStore>()
+    private val cacheStores = mutableListOf<CacheStore>()
+
+    fun getCacheStores(): List<CacheStore> {
+        return cacheStores
+    }
 
     class CachePropertiesBuilder internal constructor() {
         private val cacheProperties: CacheProperties = CacheProperties()
 
-        fun enableCache(enable: Boolean): CachePropertiesBuilder {
+        fun enableLocalCache(enable: Boolean): CachePropertiesBuilder {
             cacheProperties.enableLocalCache = enable
             return this
         }
@@ -24,6 +28,7 @@ class CacheProperties private constructor() {
     }
 
     companion object {
+        @JvmStatic
         fun builder(): CachePropertiesBuilder {
             return CachePropertiesBuilder()
         }

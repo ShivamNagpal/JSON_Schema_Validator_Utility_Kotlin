@@ -7,18 +7,18 @@ import dev.nagpal.shivam.json.schema.validator.loaders.SchemaLoader
 import dev.nagpal.shivam.json.schema.validator.vendor.SchemaIngestionService
 import dev.nagpal.shivam.json.schema.validator.vendor.SchemaValidator
 
-internal class CachingService internal constructor(
+class CachingService internal constructor(
     private val schemaLoader: SchemaLoader,
     cacheProperties: CacheProperties,
     private val schemaIngestionService: SchemaIngestionService,
 ) {
-    private val cacheStores: MutableList<CacheStore>
+    private val cacheStores: List<CacheStore>
     private val enableLocalCache: Boolean
     private lateinit var localCacheStore: LocalCacheStore
 
     init {
         this.enableLocalCache = cacheProperties.enableLocalCache
-        this.cacheStores = cacheProperties.cacheStores
+        this.cacheStores = cacheProperties.getCacheStores()
         if (cacheProperties.enableLocalCache) {
             this.localCacheStore = LocalCacheStore()
         }
