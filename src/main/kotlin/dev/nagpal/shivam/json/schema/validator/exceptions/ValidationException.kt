@@ -10,10 +10,6 @@ class ValidationException constructor(
 ) : RuntimeException(responseDetails.getMessage(*variables)) {
     val messageCode: String = responseDetails.messageCode
 
-    init {
-        println()
-    }
-
     constructor(
         responseDetails: ResponseDetails,
         vararg variables: String,

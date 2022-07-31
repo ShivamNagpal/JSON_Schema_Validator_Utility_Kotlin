@@ -22,7 +22,7 @@ class JsonValidatorService private constructor(
 
     init {
         if (cacheProperties.enableLocalCache) {
-            this.localCacheStore = LocalCacheStore()
+            this.localCacheStore = LocalCacheStore(cacheProperties)
         }
     }
 

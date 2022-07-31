@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.HashMap;
 
 class JavaAccessibilityTest {
@@ -26,7 +27,10 @@ class JavaAccessibilityTest {
     void createCachePropertiesUsingBuilder() {
         CacheProperties.CachePropertiesBuilder builder = CacheProperties.builder()
                 .enableLocalCache(false)
-                .addCacheStore(getDummyCacheStore());
+                .addCacheStore(getDummyCacheStore())
+                .expireAfterWrite(Duration.ofSeconds(300))
+                .expireAfterAccess(Duration.ofSeconds(300))
+                .concurrencyLevel(Runtime.getRuntime().availableProcessors());
         CacheProperties cacheProperties = builder.build();
         Assertions.assertNotNull(cacheProperties);
     }
