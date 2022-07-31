@@ -4,6 +4,7 @@ import dev.nagpal.shivam.json.schema.validator.cache.CacheProperties
 import dev.nagpal.shivam.json.schema.validator.cache.LocalCacheStore
 import dev.nagpal.shivam.json.schema.validator.enums.ResponseDetails
 import dev.nagpal.shivam.json.schema.validator.exceptions.ValidationException
+import dev.nagpal.shivam.json.schema.validator.loaders.SchemaLoader
 import dev.nagpal.shivam.json.schema.validator.loaders.impl.ResourceSchemaLoader
 import dev.nagpal.shivam.json.schema.validator.loaders.impl.StringSchemaLoader
 import dev.nagpal.shivam.json.schema.validator.test.helper.TestDataHelper
@@ -18,12 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension
 @ExtendWith(MockitoExtension::class)
 internal class JSONValidatorServiceTest {
     private lateinit var localCacheStore: LocalCacheStore
-    private lateinit var stringSchemaLoader: StringSchemaLoader
+    private lateinit var schemaLoader: SchemaLoader
 
     @BeforeEach
     fun beforeEach() {
         localCacheStore = Mockito.mock(LocalCacheStore::class.java)
-        stringSchemaLoader = Mockito.mock(StringSchemaLoader::class.java)
+        schemaLoader = Mockito.mock(SchemaLoader::class.java)
     }
 
     @Test
@@ -113,7 +114,7 @@ internal class JSONValidatorServiceTest {
     @Test
     fun testValidateValueUsedFromLocalCacheIfPresent() {
         val jsonValidatorService = JsonValidatorService
-            .builder(stringSchemaLoader)
+            .builder(schemaLoader)
             .cacheProperties(CacheProperties.builder().build())
             .build()
 
@@ -125,6 +126,6 @@ internal class JSONValidatorServiceTest {
         jsonValidatorService.validate(key, content)
 
         Mockito.verify(localCacheStore, Mockito.times(1)).get(Mockito.anyString())
-//        Mockito.verify(stringSchemaLoader, Mockito.times(0)).loads(Mockito.anyString())
+        Mockito.verify(schemaLoader, Mockito.times(0)).loads(Mockito.anyString())
     }
 }

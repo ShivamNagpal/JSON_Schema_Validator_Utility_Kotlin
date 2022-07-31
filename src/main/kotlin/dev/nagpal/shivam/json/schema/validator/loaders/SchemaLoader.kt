@@ -7,7 +7,7 @@ import java.util.*
 abstract class SchemaLoader {
 
     abstract fun fetchSchemaById(id: String): Optional<String>
-    fun loads(id: String): String {
+    open fun loads(id: String): String {
         try {
             val schemaOptional: Optional<String> = fetchSchemaById(id)
             if (schemaOptional.isPresent) {
