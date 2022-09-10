@@ -1,5 +1,6 @@
 import dev.nagpal.shivam.json.schema.validator.cache.CacheProperties;
 import dev.nagpal.shivam.json.schema.validator.cache.CacheStore;
+import dev.nagpal.shivam.json.schema.validator.loaders.impl.ResourceSchemaLoader;
 import dev.nagpal.shivam.json.schema.validator.loaders.impl.StringSchemaLoader;
 import dev.nagpal.shivam.json.schema.validator.services.JsonValidatorService;
 import dev.nagpal.shivam.json.schema.validator.vendor.impl.networknt.NetworkNTSchemaIngestionService;
@@ -33,6 +34,24 @@ class JavaAccessibilityTest {
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors());
         CacheProperties cacheProperties = builder.build();
         Assertions.assertNotNull(cacheProperties);
+    }
+
+    @Test
+    void createStringResourceLoaderWithEmptyConstructor() {
+        ResourceSchemaLoader resourceSchemaLoader = new ResourceSchemaLoader();
+        Assertions.assertNotNull(resourceSchemaLoader);
+    }
+
+    @Test
+    void createStringResourceLoaderWithPrefix() {
+        ResourceSchemaLoader resourceSchemaLoader = new ResourceSchemaLoader("schema");
+        Assertions.assertNotNull(resourceSchemaLoader);
+    }
+
+    @Test
+    void createStringResourceLoaderWithPrefixAndSuffix() {
+        ResourceSchemaLoader resourceSchemaLoader = new ResourceSchemaLoader("schema", ".json");
+        Assertions.assertNotNull(resourceSchemaLoader);
     }
 
     @NotNull
